@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>BestAI — Your Voice Best Friend</title>
+  <meta name="description" content="An emotionally intelligent AI best friend that adapts to you — voice only, always there.">
+
+  <!-- PWA / Install Support -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#7c6af7" />
+
+  <!-- iOS PWA Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="BestAI" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== ONBOARDING SCREEN ===== -->
+  <div id="onboarding">
+    <div class="onboard-card">
+      <div class="onboard-logo">🫂</div>
+      <h1 class="onboard-title">Meet Your Best Friend</h1>
+      <p class="onboard-sub">Adapts to your age, your vibe, your life. Always there.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input id="inp-name" type="text" placeholder="e.g. Mrinal" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>Your Age</label>
+          <input id="inp-age" type="number" placeholder="e.g. 28" min="5" max="99" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Gender</label>
+          <select id="inp-gender">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="non-binary">Non-binary / Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Friend's Name</label>
+          <input id="inp-friend" type="text" placeholder="e.g. Alex" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="form-group">
+        <label>Your Anthropic API Key</label>
+        <input id="inp-apikey" type="password" placeholder="sk-ant-api..." autocomplete="off" />
+      </div>
+
+      <button class="btn-start" id="btn-start" onclick="startApp()">
+        Start Talking →
+      </button>
+
+      <div class="key-info">
+        Get a free API key at <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a> · No phone needed
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP ===== -->
+  <div id="app">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <div class="profile-pill" id="profile-pill" onclick="goBack()">
+        <div class="profile-avatar" id="profile-avatar">M</div>
+        <span id="profile-label">You</span>
+      </div>
+      <div class="profile-pill" id="mem-pill" style="font-size:12px; cursor:default;">
+        💬 <span id="msg-count">0</span> messages today
+      </div>
+    </div>
+
+    <!-- Orb -->
+    <div class="orb-container">
+      <div class="orb-ring"></div>
+      <div class="orb" id="orb">
+        <div class="sound-bars">
+          <div class="sound-bar"></div>
+          <div class="sound-bar"></div>
+          <div class="sound-bar"></div>
+          <div class="sound-bar"></div>
+          <div class="sound-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Friend name & status -->
+    <div class="friend-name" id="friend-name">Alex</div>
+    <div class="status-label" id="status-label">Tap the mic to start talking</div>
+
+    <!-- Last message -->
+    <div class="message-bubble" id="message-bubble"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn-secondary" id="btn-clear" title="Clear conversation" onclick="clearHistory()">🗑️</button>
+      <button class="btn-mic" id="btn-mic" onclick="toggleMic()">🎤</button>
+      <button class="btn-secondary" id="btn-type" title="Type instead" onclick="typeMode()">⌨️</button>
+    </div>
+
+    <p class="hint" id="hint-bar">Hold <kbd>Space</kbd> to talk · <kbd>Esc</kbd> to stop</p>
+
+    <!-- Type input panel (inside app, hidden by default) -->
+    <div id="type-panel" style="display:none; width:90%; max-width:480px; margin-top:16px;">
+      <div style="display:flex; gap:10px; align-items:center;">
+        <input id="type-input" type="text"
+          style="flex:1;padding:14px 18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;color:#f0f0fa;font-size:15px;font-family:Inter,sans-serif;outline:none;"
+          placeholder="Type a message and press Send..."
+          onkeydown="if(event.key==='Enter') sendTyped()" />
+        <button onclick="sendTyped()"
+          style="padding:14px 20px;background:linear-gradient(135deg,#7c6af7,#f763a8);border:none;border-radius:14px;color:#fff;font-size:14px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;white-space:nowrap;">
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
