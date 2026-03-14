@@ -58,12 +58,26 @@ function startApp() {
   // Transition
   onboarding().classList.add('hidden');
   
-  // --- iOS Sound Unlock (CRITICAL) ---
-  // iOS requires a user-initiated interaction to "unlock" speech synthesis.
-  // We play a tiny silent utterance now so the app has permission to speak later.
-  const unlockUtterance = new SpeechSynthesisUtterance(" ");
-  unlockUtterance.volume = 0;
-  window.speechSynthesis.speak(unlockUtterance);
+  // --- iOS Sound Unlock (ROBUST VERSION) ---
+  // iOS Safari requires a direct user interaction to enable any audio.
+  // We do three things to be absolutely sure we unlock the speaker:
+  
+  // 1. Silent Utterance (browser speech)
+  try {
+    const unlockUtterance = new SpeechSynthesisUtterance("Let's talk");
+    unlockUtterance.volume = 0.01; // tiny volume is better than 0 for some iOS versions
+    unlockUtterance.rate = 10; // supersonic speed so user doesn't hear it
+    window.speechSynthesis.speak(unlockUtterance);
+    window.speechSynthesis.pause(); 
+    window.speechSynthesis.resume(); // force status refresh
+  } catch(e) {}
+
+  // 2. Audio Context / Dummy Audio Element
+  try {
+    const audio = new Audio();
+    audio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="; // 1ms silent wav
+    audio.play().catch(() => {});
+  } catch(e) {}
 
   setTimeout(() => {
     appEl().classList.add('visible');
