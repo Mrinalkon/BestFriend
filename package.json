@@ -1,6 +1,6 @@
 {
   "name": "ai-best-friend",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "AI Best Friend - Voice companion that adapts to you",
   "main": "server.js",
   "scripts": {
