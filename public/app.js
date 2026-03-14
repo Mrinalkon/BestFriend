@@ -60,24 +60,24 @@ function startApp() {
   
   // --- iOS Sound Unlock (ROBUST VERSION) ---
   // iOS Safari requires a direct user interaction to enable any audio.
-  // We do three things to be absolutely sure we unlock the speaker:
-  
-  // 1. Silent Utterance (browser speech)
-  try {
-    const unlockUtterance = new SpeechSynthesisUtterance("Let's talk");
-    unlockUtterance.volume = 0.01; // tiny volume is better than 0 for some iOS versions
-    unlockUtterance.rate = 10; // supersonic speed so user doesn't hear it
+  function unlock() {
+    const unlockUtterance = new SpeechSynthesisUtterance(" ");
+    unlockUtterance.volume = 0.01;
+    unlockUtterance.rate = 10;
     window.speechSynthesis.speak(unlockUtterance);
-    window.speechSynthesis.pause(); 
-    window.speechSynthesis.resume(); // force status refresh
-  } catch(e) {}
-
-  // 2. Audio Context / Dummy Audio Element
-  try {
+    
+    // Play a tiny silent wav
     const audio = new Audio();
-    audio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="; // 1ms silent wav
+    audio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
     audio.play().catch(() => {});
-  } catch(e) {}
+    
+    // Remote resume for iOS
+    window.speechSynthesis.resume();
+  }
+
+  unlock();
+  // Listen for the next touch too, just in case
+  window.addEventListener('touchstart', unlock, { once: true });
 
   setTimeout(() => {
     appEl().classList.add('visible');
@@ -249,6 +249,7 @@ async function speakAndDisplay(text, isGreeting = false) {
 
 function browserSpeak(text) {
   window.speechSynthesis.cancel();
+  window.speechSynthesis.resume(); // Crucial for iOS/Chrome stuck states
 
   const utterance = new SpeechSynthesisUtterance(text);
   currentUtterance = utterance;
@@ -369,7 +370,8 @@ function setOrbState(state) {
   const el = orb();
   el.classList.remove('listening', 'speaking', 'thinking');
   if (state !== 'idle') el.classList.add(state);
-  btnMic().textContent = state === 'recording' ? '⏹️' : state === 'speaking' ? '🔇' : '🎤';
+  // Show active speaker icon (🔊) instead of muted (🔇) to avoid confusion
+  btnMic().textContent = state === 'recording' ? '⏹️' : state === 'speaking' ? '🔊' : '🎤';
 }
 
 function setStatus(text, cls = '') {
