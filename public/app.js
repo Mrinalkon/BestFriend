@@ -17,6 +17,28 @@ let isRecording = false;
 let isSpeaking = false;
 let recognition = null;
 let currentUtterance = null;
+let audioCtx = null;
+
+// --- iOS Audio Context Warmer ---
+// This keeps the audio hardware active while we wait for the AI to respond.
+function warmAudio() {
+  try {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    // Play a tiny oscillator to "claim" the audio hardware session
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    gain.gain.value = 0.001; // nearly silent
+    osc.start(0);
+    osc.stop(audioCtx.currentTime + 0.1);
+  } catch(e) {}
+}
 
 // --- DOM Refs ---
 const onboarding   = () => document.getElementById('onboarding');
@@ -111,6 +133,7 @@ async function greetUser() {
 //  MICROPHONE (Web Speech API)
 // ============================================================
 function toggleMic() {
+  warmAudio(); // Claim audio session immediately on click
   if (isSpeaking) {
     stopSpeaking();
     return;
@@ -343,6 +366,7 @@ function typeMode() {
 }
 
 function sendTyped() {
+  warmAudio(); // Claim audio session immediately on click
   const inp = document.getElementById('type-input');
   const text = inp.value.trim();
   if (!text) return;
