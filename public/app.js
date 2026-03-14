@@ -57,6 +57,14 @@ function startApp() {
 
   // Transition
   onboarding().classList.add('hidden');
+  
+  // --- iOS Sound Unlock (CRITICAL) ---
+  // iOS requires a user-initiated interaction to "unlock" speech synthesis.
+  // We play a tiny silent utterance now so the app has permission to speak later.
+  const unlockUtterance = new SpeechSynthesisUtterance(" ");
+  unlockUtterance.volume = 0;
+  window.speechSynthesis.speak(unlockUtterance);
+
   setTimeout(() => {
     appEl().classList.add('visible');
     greetUser();
